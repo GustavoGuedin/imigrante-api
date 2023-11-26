@@ -1,9 +1,19 @@
-import { randomUUID } from 'node:crypto'
+import { randomUUID } from 'node:crypto';
 import { sql } from './db.js';
 
 export class RequiresUsers {
-    list(filters) {
-        
+    async readAll() {
+        const res = await sql` select * from users`;
+
+        return res;
+    };
+
+    async readLogin(dto) {
+        const { email, password } = dto;
+
+        const res = await sql` select COUNT(*) as total from users where email = ${email} and password = ${password}`;
+
+        return res[0].total;
     };
 
     async create(dto) {
@@ -11,7 +21,6 @@ export class RequiresUsers {
         const { username, datanascimento, email, password } = dto;
 
         await sql` insert into users (user_id, username, datanascimento, email, password) VALUES (${userId}, ${username}, ${datanascimento}, ${email}, ${password})`;
-
     };
 
     update(id, dto) {
@@ -21,4 +30,10 @@ export class RequiresUsers {
     delete(id) {
 
     };
+
+    async lerForum() {
+        const res = await sql `select * from topico_forum`;
+
+        return res;
+    }
 }

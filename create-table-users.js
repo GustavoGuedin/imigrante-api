@@ -1,8 +1,8 @@
 import { sql } from "./db.js";
 
 sql`
-ALTER TABLE users
-ALTER COLUMN user_id TYPE TEXT
+    ALTER TABLE users
+    ADD id TEXT PRIMARY KEY
 `.then(() => {
     console.log('TColuna adicionada!')
 })
