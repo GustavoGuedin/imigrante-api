@@ -224,6 +224,17 @@ server.delete('/faq/remove/:id', async (request, reply) => {
 /* ######### FIM - CHAMADAS PARA A ENTIDADE FAQ ################### */
 
 /* ######### INÍCIO - CHAMADAS PARA A ENTIDADE FÓRUM ################### */
+server.post('/forum/create', async (resquest, reply) => {
+    const { titulo, postagem, user_id } = resquest.body;
+
+    await dbForum.create({
+        titulo,
+        postagem,
+        user_id
+    });
+
+    return reply.status(201).send();
+});
 
 server.get('/forum/lerForum', async (request, reply) => {
     const respSql = await dbForum.lerForum();
@@ -235,9 +246,59 @@ server.get('/forum/lerForum', async (request, reply) => {
     }
 });
 
-server.get('/forum/lerPorId/:id', async (request, reply) => {
+server.get('/forum/readById/:id', async (request, reply) => {
     const forumId = request.params.id;
     const respSql = await dbForum.readById(forumId);
+
+    if (respSql.length) {
+        reply.status(200).send({ Content: respSql, success: true });
+    } else {
+        reply.status(401).send({ success: false, message: 'Postagem não existe' });
+    }
+});
+
+server.put('/forum/edit', async (request, reply) => {
+    try {
+        const { id, titulo, postagem } = request.body;
+
+        await dbForum.update({
+            id,
+            titulo,
+            postagem
+        });
+
+        reply.status(200).send({ success: true, message: 'Editado com sucesso' });
+    } catch (error) {
+        reply.status(500).send({ success: false, message: 'Erro ao editar' });
+    }
+});
+
+server.delete('/forum/remove/:id', async (request, reply) => {
+    const forumId = request.params.id;
+    
+    try {
+        await dbForum.delete(forumId);
+        reply.status(200).send({ success: true, message: 'Entrada removida' });
+    } catch (err) {
+        reply.status(500).send({ success: false, message: 'Erro ao remover' });
+    }
+});
+
+server.post('/forum/reply', async (resquest, reply) => {
+    const { resposta, user_id, topic_id } = resquest.body;
+
+    await dbForum.reply({
+        resposta,
+        user_id,
+        topic_id
+    });
+
+    return reply.status(201).send();
+});
+
+server.get('/forum/lerRespostas/:id', async (request, reply) => {
+    const forumId = request.params.id;
+    const respSql = await dbForum.lerRespostas(forumId);
 
     if (respSql.length) {
         reply.status(200).send({ Content: respSql, success: true });
