@@ -11,7 +11,7 @@ export class RequiresForum {
     };
 
     async readById(id) {
-        const res = await sql` select * from topico_forum where id = ${String(id)}`;
+        const res = await sql `select t.titulo, t.postagem, t.user_id, u.username from topico_forum t join users u on t.user_id = u.id where t.id = ${id}`;
 
         return res;
     };
@@ -34,15 +34,18 @@ export class RequiresForum {
 
     async reply(dto) {
         const { resposta, user_id, topic_id } = dto;
-        const forumId = randomUUID();
 
-        await sql` insert into resposta_forum (id, resposta, user_id, topic_id) VALUES (${forumId}, ${resposta}, ${user_id}, ${topic_id})`;
+        await sql` insert into resposta_forum (resposta, user_id, topic_id) VALUES (${resposta}, ${user_id}, ${topic_id})`;
     };
 
     async lerRespostas(id) {
-        const res = await sql` select * from resposta_forum where topic_id = ${id}`;
+        const res = await sql `select t.id, t.resposta, t.topic_id, t.user_id, u.username from resposta_forum t join users u on t.user_id = u.id where t.topic_id = ${id} order by t.id`;
 
         return res;
     };
+
+    async deleteReply(id) {
+        await sql `DELETE FROM resposta_forum WHERE id = ${id};`
+    }
 
 }

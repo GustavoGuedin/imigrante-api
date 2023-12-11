@@ -307,6 +307,17 @@ server.get('/forum/lerRespostas/:id', async (request, reply) => {
     }
 });
 
+server.delete('/forum/removeReply/:id', async (request, reply) => {
+    const forumId = request.params.id;
+    
+    try {
+        await dbForum.deleteReply(forumId);
+        reply.status(200).send({ success: true, message: 'Entrada removida' });
+    } catch (err) {
+        reply.status(500).send({ success: false, message: 'Erro ao remover' });
+    }
+});
+
 server.listen({
     port: 3333
 });
