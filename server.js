@@ -4,6 +4,7 @@ import { RequiresUsers } from "./requires-users.js";
 import { RequiresLocations } from "./require-locations.js";
 import { RequiresFaq } from "./require-faq.js";
 import { RequiresForum } from "./requires-forum.js";
+import { RequireInterprete } from "./require-interprete.js";
 
 const server = fastify();
 
@@ -17,6 +18,7 @@ const dbUser = new RequiresUsers;
 const dbLocation = new RequiresLocations;
 const dbFaq = new RequiresFaq;
 const dbForum = new RequiresForum;
+const dbInterprete = new RequireInterprete;
 
 /* ######### INÍCIO - CHAMADAS PARA A ENTIDADE USER ################### */
 server.post('/signin/create', async (resquest, reply) => {
@@ -315,6 +317,73 @@ server.delete('/forum/removeReply/:id', async (request, reply) => {
         reply.status(200).send({ success: true, message: 'Entrada removida' });
     } catch (err) {
         reply.status(500).send({ success: false, message: 'Erro ao remover' });
+    }
+});
+
+/* ######### INÍCIO - CHAMADAS PARA A ENTIDADE InTÉRPRETE ################### */
+
+server.post('/interprete/create', async (resquest, reply) => {
+    const { username, telefone, email, endereco, idioma } = resquest.body;
+
+    await dbInterprete.create({
+        username,
+        telefone,
+        email,
+        endereco,
+        idioma
+    });
+
+    return reply.status(201).send();
+});
+
+server.get('/interprete/recoverAll', async (request, reply) => {
+    const respSql = await dbInterprete.readAll();
+
+    if (respSql.length) {
+        reply.status(200).send({ Content: respSql, success: true });
+    } else {
+        reply.status(401).send({ success: false, message: 'Nenhum intérprete cadastrado cadastrado!' });
+    }
+});
+
+server.get('/interprete/readById/:id', async (request, reply) => {
+    const interpreteId = request.params.id;
+    const respSql = await dbInterprete.readById(interpreteId);
+
+    if (respSql.length) {
+        reply.status(200).send({ Content: respSql, success: true });
+    } else {
+        reply.status(401).send({ success: false, message: 'Intérprete não cadastrado' });
+    }
+});
+
+server.delete('/interprete/remove/:id', async (request, reply) => {
+    const interpreteId = request.params.id;
+
+    try {
+        await dbInterprete.delete(interpreteId);
+        reply.status(200).send({ success: true, message: 'Intérprete removido com sucesso' });
+    } catch (err) {
+        reply.status(500).send({ success: false, message: 'Erro ao remover o intérprete' });
+    }
+});
+
+server.put('/interprete/edit', async (request, reply) => {
+    try {
+        const { id, username, telefone, email, endereco, idioma } = request.body;
+
+        await dbInterprete.update({
+            id, 
+            username, 
+            telefone,
+            email, 
+            endereco,
+            idioma
+        });
+
+        reply.status(200).send({ success: true, message: 'Intérprete atualizado com sucesso' });
+    } catch (error) {
+        reply.status(500).send({ success: false, message: 'Erro ao atualizar o intérprete' });
     }
 });
 
